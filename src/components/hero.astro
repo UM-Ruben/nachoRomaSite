@@ -1,68 +1,82 @@
 ---
 ---
-<!-- src/components/hero.astro -->
-<div id="inicio" class="relative h-screen w-full overflow-hidden bg-zinc-900">
-    <!-- Imagen de fondo: capa más baja (z-0) -->
-    <img
-        src="/Foto_escritorio.jpg"
-        alt="Fondo escritorio"
-        class="absolute inset-0 w-full h-full object-cover z-0"
-    />
+<section id="hero" class="relative w-full h-screen overflow-hidden bg-black flex items-center justify-center">
+  <img
+    src="/Foto_escritorio.jpg"
+    alt="Fondo"
+    class="capa-bg absolute inset-0 w-full h-full object-cover z-0 opacity-0"
+  />
 
-    <!-- Texto principal: queda entre fondo y figura recortada (z-10) -->
-    <h1
-        class="absolute inset-x-0 top-1/2 transform -translate-y-1/2 z-10 text-white font-family-hanson text-6xl md:text-[10rem] tracking-widest text-center whitespace-nowrap hero-text"
-        aria-label="NACHO ROMÁ"
-    >
-        NACHO ROMÁ
-    </h1>
+  <h1 class="letras-nacho relative z-10 font-family-hanson font-bold text-6xl md:text-[10rem] text-white whitespace-nowrap drop-shadow-2xl uppercase" style="clip-path: polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%);">
+    NACHO ROMA
+  </h1>
 
-    <!-- Imagen recortada: capa superior que tapa el texto (z-20) -->
-    <img
-        src="/Foto_escritorio_sinFondo.png"
-        alt="Nacho Romá"
-        class="absolute inset-0 w-full h-full object-cover z-20 pointer-events-none"
-        aria-hidden="true"
-    />
-</div>
+  <img
+    src="/Foto_escritorio_sinFondo.png"
+    alt="Nacho"
+    class="capa-nacho absolute inset-0 w-full h-full object-cover z-20 pointer-events-none opacity-0"
+    aria-hidden="true"
+  />
+</section>
 
-<style>
-    /* Sombra pronunciada y animación de entrada para el texto */
-    .hero-text {
-        /* Proyección de sombra para dar volumen sobre el fondo */
-        text-shadow: 0px 15px 30px rgba(0, 0, 0, 0.65);
+<script>
+  import { gsap } from "gsap";
+  import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-        /* Estado inicial: invisible y ligeramente mayor (para hacer zoom-out) */
-        opacity: 0;
-        transform: scale(1.05);
+  gsap.registerPlugin(ScrollTrigger);
 
-        /* Animación de entrada: 1.5s, easing suave, mantiene estado final */
-        animation: fadeScale 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
+  document.addEventListener("DOMContentLoaded", () => {
+    // Animación de entrada
+    const entryTl = gsap.timeline();
 
-    @keyframes fadeScale {
-        0% {
-            opacity: 0;
-            transform: scale(1.05);
-        }
-        100% {
-            opacity: 1;
-            transform: scale(1);
-        }
-    }
+    entryTl.to(
+      [".capa-bg", ".capa-nacho"],
+      {
+        duration: 2,
+        opacity: 1,
+        scale: 1,
+        ease: "power2.out",
+      },
+      0
+    );
 
-    /* Opcional: asegurar que el texto no pierda nitidez en tamaños muy grandes */
-    .hero-text {
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-    }
+    // Animación del texto con clip-path reveal
+    entryTl.to(
+      ".letras-nacho",
+      {
+        duration: 2.2,
+        opacity: 1,
+        clipPath: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
+        ease: "power2.out",
+      },
+      0.2
+    );
 
-    /* Ajuste responsivo fino (opcional): evita overflow en pantallas pequeñas */
-    @media (max-width: 640px) {
-        .hero-text {
-            font-size: 3rem; /* fallback si Tailwind no aplica en este contexto */
-            white-space: normal;
-            padding: 0 1rem;
-        }
-    }
-</style>
+    // Animaciones de Scroll (Parallax 3D) - Comienzan después de la entrada
+    gsap.delayedCall(2.5, () => {
+      // Ambas capas se mueven juntas para no separarse
+      gsap.to([".capa-bg", ".capa-nacho"], {
+        y: "15%",
+        ease: "none",
+        scrollTrigger: {
+          trigger: "#hero",
+          start: "top top",
+          end: "bottom top",
+          scrub: 1,
+        },
+      });
+
+      gsap.to(".letras-nacho", {
+        y: "-40%",
+        opacity: 0,
+        ease: "none",
+        scrollTrigger: {
+          trigger: "#hero",
+          start: "top top",
+          end: "bottom top",
+          scrub: 1,
+        },
+      });
+    });
+  });
+</script>
